@@ -42,9 +42,9 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
        return -1 
 
 
-class Produto:    
-    def __init__(self, ultimo_id, nome, preco, quantidade, perecivel=False, data_validade=None):
-        self.produto_id = ultimo_id
+class Produto(id):
+    def __init__(self, nome, preco, quantidade, perecivel=False, data_validade=None):
+        self.produto_id += id
         self.nome = nome
         self.preco = preco
         self.quantidade = quantidade
@@ -54,12 +54,8 @@ class Produto:
     def __str__(self):
         return f"{self.nome} (Código: {self.codigo}) - R$ {self.preco:.2f}"
     
-    def get_produto_id(self):
-        return self.produto_id
-    
-    def set_produto_id(self, ultimo_id):
-        self.produto_id += ultimo_id
-
+    def set_produto_id(self, produto_id):
+        self.produto_id = produto_id
 
     def get_nome(self):
         return self.nome
@@ -67,13 +63,8 @@ class Produto:
     def set_nome(self, nome):
         self.nome = nome
 
-
-    def get_preco(self):
-        return self.preco
-        
     def set_preco(self, preco):
         self.preco = preco
-
 
     def get_quantidade(self):
         return self.quantidade
@@ -81,16 +72,8 @@ class Produto:
     def set_quantidade(self, quantidade):
         self.quantidade = quantidade
 
-
-    def get_perecivel(self):
-        return self.perecivel
-
     def set_perecivel(self, perecivel):
         self.perecivel = perecivel
-
-
-    def get_data_validade(self):
-        return self.data_validade
 
     def set_data_validade(self, data_validade):
         self.data_validade = data_validade
@@ -137,8 +120,8 @@ class Controle_Venda:
 
 if __name__ == "__main__":        
     database = Registros()
-    ultimo_produto_id = 0
-    ultimo_venda_id = 0
+    produto_id = 0
+    venda_id = 0
 
     ''' produto1 = Produto(1, "Camiseta", 29.99, 100)
         produto2 = Produto(2, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
@@ -166,39 +149,18 @@ if __name__ == "__main__":
                 while True:
                     os.system('cls')
                     print(f" --------- Estoque --------- ")
-                    print(f"0 - Voltar")
+                    print(f"0 - Sair")
                     print(f"1 - Adicionar produto")                
                     opcao = int(input("Escolha uma opção: "))
                     match opcao:
                         case 0:
                             break     
                         case 1:
-                            # Produto(ultimo_produto_id, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
-                            print(f" --------- Cadastrar Produto --------- ")  
-                            produto = []    
-                            produto.append(ultimo_produto_id + 1)
-
-                            nome = input("Nome: ")  
-                            produto.append(nome)   
-                            preco = float(input("Preço: "))  
-                            produto.append(preco)   
-                            quantidade = int(input("Quantidade: "))  
-                            produto.append(quantidade)   
-                            perecivel = input("É perecivel?(s/n) : ") 
-                            if perecivel == 's':
-                                produto.append(True)   
-                                data = input("informe a data (00/00/0000) : ") 
-                                data = data.split('/')                                
-                                produto.append(datetime(int(data[2]), int(data[1]), int(data[0])))  
-                            else:
-                                produto.append(False)  
-                                produto.append(None) 
-                            print(produto)
-                            Estoque(database).adicionar_produto(produto)
-                            ultimo_produto_id += 1
-                            produto = Produto(produto[0], produto[1], produto[2], produto[3], produto[4], produto[5])
-                            input("Produto cadastrado com sucesso.") 
-
+                            print(f" --------- Cadastrar Produto --------- ")
+                            print(f"0 - Sair")
+                            print(f"1 - Adicionar produto")  
+                            produto2 = Produto(2, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
+                            opcao = int(input("Escolha uma opção: "))   
             case 2:
                 ...           
             case _:
