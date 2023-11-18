@@ -1,14 +1,17 @@
 from datetime import datetime
 from abc import ABC, abstractmethod
 
-class Registros():    
+class Registros(ABC):
+    produtos = []
+    vendas = []
 
     def __init__(self):
         self.__produtos = []
         self.__vendas = []
-   
+
+    @abstractmethod
     def get_produtos(self):
-        return self.__produtos 
+        return self.produtos 
 
     
     def get_vendas(self):
@@ -16,11 +19,11 @@ class Registros():
 
 
 class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produtos
-    def __init__(self, database):        
-        self.__database = database   
+    def __init__(self):        
+        ...    
     
     def adicionar_produto(self, produto):        
-       self.__database.get_produtos().append(produto)        
+        Registros.get_produtos().append(produto)        
     
     def atualizar_estoque(self, codigo, quantidade): # usar o mecanismo de pesquisa binaria, recursao
         for produto in self.__produtos:
@@ -82,13 +85,13 @@ class Venda(ABC):
 
 
 if __name__ == "__main__":        
-    database = Registros()
+
     # produto1 = Produto(1, "Camiseta", 29.99, 100)
     produto = Produto(1, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
     # print(produto)
-    Estoque(database).adicionar_produto(produto)
-    Estoque(database).adicionar_produto(produto)
-    print(database.get_produtos())
+    Estoque().adicionar_produto(produto)
+    Estoque().adicionar_produto(produto)
+    print(Registros.produtos)
     
     #Estoque.Estoque.adicionar_produto(produto2)
 
