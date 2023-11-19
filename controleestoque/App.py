@@ -20,26 +20,46 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
     def __init__(self, database):        
         self.__produtos = database.get_produtos()   
     
-    def adicionar_produto(self, produto):        
+    def cadastrar_produto(self, produto):        
        self.__produtos.append(produto)
           
     
-    def atualizar_estoque(self, codigo, quantidade): # usar o mecanismo de pesquisa binaria, recursao
-        for produto in self.__produtos:
-            if produto.codigo == codigo:
-                produto.quantidade += quantidade
-                return True
-        return False
+    def repor_produto(self, produto_id, quantidade): 
+        produto_bd = self.produto_por_id(produto_id)        
+        if len(produto_bd) < 2:
+           raise ValueError('ID invalido')
+                   
+        if  quantidade < 0:                
+            print('Não é permitido valores negativos para quantidade')
+        else:                
+            produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() +  quantidade) 
+            self.__produtos[produto_bd[0]] = produto_bd[1]
+        
+
+    def remover_produto(self, produto_id, quantidade): 
+        produto_bd = self.produto_por_id(produto_id)
+        if len(produto_bd) < 2:
+            return
+        if  quantidade <= 0:                
+            print('Não é permitido valores negativos para quantidade')
+        elif produto_bd[1].get_quantidade() < quantidade:
+            print('Não há quantidade de produtos suficiente')
+        else:                
+            produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() -  quantidade) 
+            self.__produtos[produto_bd[0]] = produto_bd[1] 
+            print('Produto removido com sucesso')  
+       
     
     def estoque(self):
         return self.__produtos
     
     def produto_por_id(self, produto_id): # fazer pesquisa binaria
-       for produto in self.__produtos:
-            if produto.produto_id == produto_id:            
-                return produto
+       
+       for produto in self.__produtos:      
+            if produto.get_produto_id() == produto_id:            
+                return [self.__produtos.index(produto), produto]
         
-       return -1 
+       return [] 
 
 
 class Produto:    
@@ -52,7 +72,7 @@ class Produto:
         self.data_validade = data_validade
 
     def __str__(self):
-        return f"{self.nome} (Código: {self.codigo}) - R$ {self.preco:.2f}"
+        return f"{self.produto_id} | {self.nome} | {self.preco} | {self.quantidade} | {self.perecivel} | {self.data_validade}"
     
     def get_produto_id(self):
         return self.produto_id
@@ -115,14 +135,16 @@ class Controle_Venda:
         self.__estoque = Estoque(database)
         self.__vendas = database.get_vendas() 
     
-    def realizar_venda(self, venda): 
+    def realizar_venda(self, venda):
         for produto in venda.get_produtos_venda():
             produto_bd = self.__estoque.produto_por_id(produto['produto_id'])
-            if produto_bd.get_quantidade() < produto['quantidade']:
+            if len(produto_bd) < 2:
+                continue
+            if produto_bd[1].get_quantidade() < produto['quantidade']:
                 venda.get_produtos_venda().remove(produto)
-                print('O produto ',produto_bd.get_nome(), ' foi removido da venda por nao possui quantidade suficiente em estoque')
+                print('O produto ',produto_bd[1].get_nome(), ' foi removido da venda por nao possui quantidade suficiente em estoque')
             else:
-                produto_bd.set_quantidade( produto_bd.get_quantidade() -  produto['quantidade'])
+                produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() -  produto['quantidade'])
 
         self.__vendas.append(venda)  
         print('venda realizada com sucesso')
@@ -143,8 +165,8 @@ if __name__ == "__main__":
     ''' produto1 = Produto(1, "Camiseta", 29.99, 100)
         produto2 = Produto(2, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
         
-        Estoque(database).adicionar_produto(produto1)
-        Estoque(database).adicionar_produto(produto2)
+        Estoque(database).cadastrar_produto(produto1)
+        Estoque(database).cadastrar_produto(produto2)
 
         venda = Venda(1,'venda de natal', [{'produto_id':1, 'quantidade':101}, {'produto_id':2, 'quantidade':1}])   
 
@@ -157,7 +179,12 @@ if __name__ == "__main__":
         print(f"0 - Sair")
         print(f"1 - Estoque")
         print(f"2 - Comprar")
-        opcao = int(input("Escolha uma opção: "))
+        try:
+            opcao = int(input("Escolha uma opção: "))
+        except:
+            input("Informe uma opção valida")
+            os.system('cls')
+            continue
 
         match opcao:
             case 0:                
@@ -167,13 +194,21 @@ if __name__ == "__main__":
                     os.system('cls')
                     print(f" --------- Estoque --------- ")
                     print(f"0 - Voltar")
-                    print(f"1 - Adicionar produto")                
-                    opcao = int(input("Escolha uma opção: "))
+                    print(f"1 - Adicionar um novo produto")                
+                    print(f"2 - Mostrar produtos")                
+                    print(f"3 - Repor produto")                
+                    try:
+                        opcao = int(input("Escolha uma opção: "))
+                    except:
+                         input("Informe uma opção valida")
+                         os.system('cls')
+                         continue
+                    
                     match opcao:
                         case 0:
                             break     
                         case 1:
-                            # Produto(ultimo_produto_id, "Bermuda", 39.99, 50, True, datetime(2023, 12, 31))
+                            os.system('cls')
                             print(f" --------- Cadastrar Produto --------- ")  
                             produto = []    
                             produto.append(ultimo_produto_id + 1)
@@ -187,20 +222,39 @@ if __name__ == "__main__":
                             perecivel = input("É perecivel?(s/n) : ") 
                             if perecivel == 's':
                                 produto.append(True)   
-                                data = input("informe a data (00/00/0000) : ") 
+                                data = input("Data de vencimento (00/00/0000) : ") 
                                 data = data.split('/')                                
                                 produto.append(datetime(int(data[2]), int(data[1]), int(data[0])))  
                             else:
                                 produto.append(False)  
-                                produto.append(None) 
-                            print(produto)
-                            Estoque(database).adicionar_produto(produto)
-                            ultimo_produto_id += 1
+                                produto.append(None)
+                            
                             produto = Produto(produto[0], produto[1], produto[2], produto[3], produto[4], produto[5])
+                            Estoque(database).cadastrar_produto(produto)
+                            ultimo_produto_id += 1
                             input("Produto cadastrado com sucesso.") 
 
+                        case 2:
+                            os.system('cls')
+                            print(f" --------- Produtos --------- ")  
+                            for produtor in database.get_produtos():
+                                print(produtor)  
+                            input("Entender para continuar.")  
+                        
+                        case 3:
+                            os.system('cls')
+                            print(f" --------- Repor Produto --------- ")  
+                            produto_id = int(input("Informe o ID do produto que deseja repor: ")) 
+                            quantidade = int(input("Informe a quantidade: ")) 
+                            try:
+                                Estoque(database).repor_produto(produto_id, quantidade)
+                                input("Produto reposto com sucesso.") 
+                            except ValueError:
+                                input("Informe um ID valido")
+                                continue
+
             case 2:
-                ...           
+                ...       
             case _:
                 print("Falha no engano")
 
