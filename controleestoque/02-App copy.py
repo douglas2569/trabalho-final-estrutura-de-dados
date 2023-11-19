@@ -83,10 +83,7 @@ class Estoque():
     def estoque(self):
         return self.__produtos
     
-    def produto_por_id_binaria(self, produto_id, produtos): # pesquisa binaria
-       ... 
-    
-    def produto_por_id(self, produto_id):
+    def produto_por_id(self, produto_id): # fazer pesquisa binaria
        
        for produto in self.__produtos:      
             if produto.get_produto_id() == produto_id:            

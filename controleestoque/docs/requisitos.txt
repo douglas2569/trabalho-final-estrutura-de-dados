@@ -5,4 +5,4 @@
 - atualização de estoque (Checked)
 - vendas (Checked)
 - relatórios de vendas  (Checked)
-- controle de validade para produtos perecíveis.
+- controle de validade para produtos perecíveis. (Checked)
