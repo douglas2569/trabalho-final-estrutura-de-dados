@@ -1,6 +1,19 @@
-from datetime import datetime
+from datetime import date, timedelta
 from abc import ABC, abstractmethod
 import os 
+
+def converter_data(data):
+    data = str(data) 
+    data = data.split('-')                                
+    data = f"{data[2]}/{data[1]}/{data[0]}"
+
+    return data
+
+def inverter_data(data):
+    data = str(data) 
+    data = data.split('/')
+
+    return date(int(data[2]), int(data[1]), int(data[0]))
 
 class Registros():    
 
@@ -22,12 +35,20 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
     def mostrar_produtos(self):                
         for produto in self.__produtos:
             print(produto) 
-        
+    
+    def mostrar_produtos_vencidos(self):
+        for produto in self.__produtos:
+            if produto.get_perecivel() and produto.get_data_validade() < date.today():
+                print(produto)
+
+    def mostrar_produtos_vencimento(self, dia):
+        for produto in self.__produtos:
+            if produto.get_perecivel() and produto.get_data_validade() >= date.today() and produto.get_data_validade() <= date.today() + timedelta(dia):
+                print(produto)
     
     def cadastrar_produto(self, produto):        
        self.__produtos.append(produto)
-          
-    
+     
     def repor_produto(self, produto_id, quantidade): 
         produto_bd = self.produto_por_id(produto_id)        
         if len(produto_bd) < 2:
@@ -38,8 +59,7 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
         else:                
             produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() +  quantidade) 
             self.__produtos[produto_bd[0]] = produto_bd[1]
-        
-
+    
     def remover_produto(self, produto_id, quantidade): 
         produto_bd = self.produto_por_id(produto_id)
         if len(produto_bd) < 2:
@@ -60,7 +80,6 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
                          
         self.__produtos.remove(produto_bd[1])               
 
-    
     def estoque(self):
         return self.__produtos
     
@@ -71,6 +90,15 @@ class Estoque(): #usar pilha para da CTRL + Z ou  Y em excluir e atualizar produ
                 return [self.__produtos.index(produto), produto]
         
        return [] 
+    
+    def produto_vencido(self, produto_id): 
+       produto_bd = self.produto_por_id(produto_id)
+       if len(produto_bd) < 2:
+            return
+       
+       if produto_bd[1].get_perecivel() and produto_bd[1].get_data_validade() < date.today():   
+            return True
+       return False 
 
 class Produto:    
     def __init__(self, ultimo_id, nome, preco, quantidade, perecivel=False, data_validade=None):
@@ -83,7 +111,7 @@ class Produto:
 
     def __str__(self):
         if self.perecivel:            
-            return f"ID: {self.produto_id} | {self.nome} | R$ {self.preco} | {self.quantidade} | {self.data_validade}"
+            return f"ID: {self.produto_id} | {self.nome} | R$ {self.preco} | {self.quantidade} | {converter_data(self.data_validade)}"
         else:
             return f"ID: {self.produto_id} | {self.nome} | R$ {self.preco} | {self.quantidade}"
 
@@ -163,11 +191,18 @@ class Controle_Venda:
             produto_bd = self.__estoque.produto_por_id(produto['produto_id'])
             if len(produto_bd) < 2:
                 continue
-            if produto_bd[1].get_quantidade() < produto['quantidade']:
+            if Estoque(database).produto_vencido(produto['produto_id']):
                 venda.get_produtos_venda().remove(produto)
-                print('O produto ',produto_bd[1].get_nome(), ' foi removido da venda por nao possui quantidade suficiente em estoque')
+                input(f"O produto {produto_bd[1].get_nome()} foi removido da venda porque está vencido")
+
+            elif produto_bd[1].get_quantidade() < produto['quantidade']:
+                venda.get_produtos_venda().remove(produto)
+                input(f"O produto {produto_bd[1].get_nome()} foi removido da venda por nao possui quantidade suficiente em estoque")
+
             else:
-                produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() -  produto['quantidade'])
+                produto_bd[1].set_quantidade( produto_bd[1].get_quantidade() -  produto['quantidade'] )
+                self.__estoque.estoque()[produto_bd[0]] = produto_bd[1]
+
 
         if len(venda.get_produtos_venda()) > 0:
             self.__vendas.append(venda)
@@ -205,6 +240,7 @@ if __name__ == "__main__":
         match opcao:
             case 0:                
                 break
+            
             case 1:
                 while True:
                     os.system('cls')
@@ -212,8 +248,10 @@ if __name__ == "__main__":
                     print(f"0 - Voltar")
                     print(f"1 - Adicionar um novo produto")                
                     print(f"2 - Mostrar produtos")                
-                    print(f"3 - Repor produto")   
-                    print(f"4 - Excluir produto")   
+                    print(f"3 - Mostrar produtos proximo ao vencimento ( 30 dias )")                
+                    print(f"4 - Mostrar produtos vencidos")                
+                    print(f"5 - Repor produto")   
+                    print(f"6 - Excluir produto")   
 
                     try:
                         opcao = int(input("Escolha uma opção*: "))
@@ -225,6 +263,7 @@ if __name__ == "__main__":
                     match opcao:
                         case 0:
                             break     
+                        
                         case 1:
                             os.system('cls')
                             print(f" --------- Cadastrar Produto --------- ")  
@@ -240,9 +279,8 @@ if __name__ == "__main__":
                             perecivel = input("É perecivel?(s/n)*: ") 
                             if perecivel == 's':
                                 produto.append(True)   
-                                data = input("Data de vencimento (00/00/0000)*: ") 
-                                data = data.split('/')                                
-                                produto.append(datetime(int(data[2]), int(data[1]), int(data[0])))  
+                                data = input("Data de vencimento (00/00/0000)*: ")     
+                                produto.append(inverter_data(data))  
                             else:
                                 produto.append(False)  
                                 produto.append(None)
@@ -254,11 +292,23 @@ if __name__ == "__main__":
 
                         case 2:
                             os.system('cls')
-                            print(f" --------- Produtos --------- ")  
+                            print(f" --------- Todos Produtos --------- ")  
                             Estoque(database).mostrar_produtos()
                             input("Entender para continuar.")  
                         
                         case 3:
+                            os.system('cls')
+                            print(f" --------- Produtos proximo ao vencimento ( 30 dias ) --------- ")  
+                            Estoque(database).mostrar_produtos_vencimento(30)
+                            input("Entender para continuar.")
+                        
+                        case 4:
+                            os.system('cls')
+                            print(f" --------- Produtos Vencidos --------- ")  
+                            Estoque(database).mostrar_produtos_vencidos()
+                            input("Entender para continuar.")
+
+                        case 5:
                             os.system('cls')
                             print(f" --------- Repor Produto --------- ")  
                             produto_id = int(input("Informe o ID do produto que deseja repor*: ")) 
@@ -270,7 +320,7 @@ if __name__ == "__main__":
                                 input("Informe um ID valido")
                                 continue
 
-                        case 4:
+                        case 6:
                             os.system('cls')
                             print(f" --------- Excluir Produto --------- ")  
                             produto_id = int(input("Informe o ID do produto que deseja excluir*: ")) 
