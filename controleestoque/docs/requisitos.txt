@@ -1,8 +1,8 @@
 - Desenvolva um sistema de controle de estoque para uma loja
 - Utilize as estruturas de dados que julgue adequadas. 
 
-- cadastro de produtos
-- atualização de estoque
-- vendas 
-- relatórios de vendas 
+- cadastro de produtos (Checked)
+- atualização de estoque (Checked)
+- vendas (Checked)
+- relatórios de vendas  (Checked)
 - controle de validade para produtos perecíveis.
