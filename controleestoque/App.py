@@ -1,6 +1,13 @@
 from datetime import date, timedelta
-from abc import ABC, abstractmethod
-import os 
+import os, platform
+
+
+def limpar_tela():
+    if platform.system() == 'Windows' or platform.system() == 'windows':
+        os.system('cls') 
+    else:
+       os.system('clear') 
+       
 
 def converter_data(data):
     data = str(data) 
@@ -238,13 +245,13 @@ if __name__ == "__main__":
         print(f"0 - Sair")
         print(f"1 - Estoque")
         print(f"2 - Comprar")
-        print(f"3 - Relatório de Vendas")
-        
+        print(f"3 - Relatório de Vendas")        
+
         try:
             opcao = int(input("Escolha uma opção*: "))
         except:
             input("Informe uma opção valida")
-            os.system('cls')
+            limpar_tela()
             continue
 
         match opcao:
@@ -253,7 +260,7 @@ if __name__ == "__main__":
             
             case 1:
                 while True:
-                    os.system('cls')
+                    limpar_tela()
                     print(f" --------- Estoque --------- ")
                     print(f"0 - Voltar")
                     print(f"1 - Adicionar um novo produto")                
@@ -267,7 +274,7 @@ if __name__ == "__main__":
                         opcao = int(input("Escolha uma opção*: "))
                     except:
                          input("Informe uma opção valida")
-                         os.system('cls')
+                         limpar_tela()
                          continue
                     
                     match opcao:
@@ -275,7 +282,7 @@ if __name__ == "__main__":
                             break     
                         
                         case 1:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Cadastrar Produto --------- ")  
                             produto = []    
                             produto.append(ultimo_produto_id + 1)
@@ -301,25 +308,25 @@ if __name__ == "__main__":
                             input("Produto cadastrado com sucesso.") 
 
                         case 2:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Todos Produtos --------- ")  
                             Estoque(database).mostrar_produtos()
                             input("Entender para continuar.")  
                         
                         case 3:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Produtos proximo ao vencimento ( 30 dias ) --------- ")  
                             Estoque(database).mostrar_produtos_vencimento(30)
                             input("Entender para continuar.")
                         
                         case 4:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Produtos Vencidos --------- ")  
                             Estoque(database).mostrar_produtos_vencidos()
                             input("Entender para continuar.")
 
                         case 5:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Repor Produto --------- ")  
                             produto_id = int(input("Informe o ID do produto que deseja repor*: ")) 
                             quantidade = int(input("Informe a quantidade*: ")) 
@@ -331,7 +338,7 @@ if __name__ == "__main__":
                                 continue
 
                         case 6:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Excluir Produto --------- ")  
                             produto_id = int(input("Informe o ID do produto que deseja excluir*: ")) 
                             #try:
@@ -343,7 +350,7 @@ if __name__ == "__main__":
 
             case 2:
                 while True:
-                    os.system('cls')
+                    limpar_tela()
                     if len(Estoque(database).estoque()) <= 0:
                         input("Não é possivel efetuar compras, pois não a produtos cadastrados")  
                         break
@@ -357,7 +364,7 @@ if __name__ == "__main__":
                         opcao = int(input("Escolha uma opção*: "))
                     except:
                          input("Informe uma opção valida")
-                         os.system('cls')
+                         limpar_tela()
                          continue
                     
                     match opcao:
@@ -365,13 +372,13 @@ if __name__ == "__main__":
                             break 
 
                         case 1:
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Produtos --------- ")  
                             Estoque(database).mostrar_produtos()  
                             input("Pressione Enter para continuar.") 
 
                         case 2:
-                            os.system('cls')                            
+                            limpar_tela()                            
                             print(f" --------- Efetuar Compra --------- ")
                             venda = []    
                             venda.append(ultimo_venda_id + 1)
@@ -390,13 +397,13 @@ if __name__ == "__main__":
 
                             venda.append(produtos)     
                             venda = Venda(database, venda[0],venda[1], venda[2]) 
-                            os.system('cls')
+                            limpar_tela()
                             print(f" --------- Detalhes da compra --------- ")
                             Controle_Venda(database).realizar_venda(venda)
                             ultimo_venda_id += 1 
                             
             case 3:                
-                os.system('cls')
+                limpar_tela()
                 if len(Controle_Venda(database).vendas()) <= 0:
                     input("Nenhuma venda foi realizada")  
                 else:                
@@ -407,7 +414,7 @@ if __name__ == "__main__":
             case _:
                 print("Falha no engano")
 
-        os.system('cls')
+        limpar_tela()
 
         
     
