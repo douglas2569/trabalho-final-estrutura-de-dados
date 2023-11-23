@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 import os, platform
 
+# você deve me entregar um arquivo compactado (em formato zip - não quero receber em formato rar, ok?)
 
 def limpar_tela():
     if platform.system() == 'Windows' or platform.system() == 'windows':
