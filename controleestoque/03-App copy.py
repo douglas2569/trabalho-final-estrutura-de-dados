@@ -92,25 +92,21 @@ class Estoque():
 
     def estoque(self):
         return self.__produtos
-   
+    
     @staticmethod
-    def produto_por_id_binaria(produto_id, produtos, db_produtos):
-        if len(produtos) <= 0:
-            return []  
+    def produto_por_id_binaria(produto_id, produtos): # pesquisa binaria ainda não concluida
+        if len(produtos) > 0:
+            tamanho = len(produtos) 
+            meio = tamanho // 2        
+            if produtos[meio].get_produto_id() < produto_id:
+                Estoque.produto_por_id_binaria(produto_id, produtos[:meio-1])
 
-        if len(produtos) == 1:    
-            return [ db_produtos.index(produtos[0]), produtos[0] ]  
-
-        tamanho = len(produtos) 
-        meio = tamanho // 2    
-                      
-        if produtos[meio].get_produto_id() < produto_id:
-            return Estoque.produto_por_id_binaria(produto_id, produtos[meio:], db_produtos)            
-        elif  produtos[meio].get_produto_id() > produto_id:  
-            return Estoque.produto_por_id_binaria(produto_id, produtos[:meio], db_produtos)            
-        else:            
-            return [ db_produtos.index(produtos[meio]), produtos[meio], db_produtos ]
-   
+            elif  produtos[meio].get_produto_id() > produto_id:  
+                Estoque.produto_por_id_binaria(produto_id, produtos[meio-1:])            
+            else:
+                return [produtos.index(produtos[meio]), produtos[meio]]
+        
+    
     def produto_por_id(self, produto_id):
        
        for produto in self.__produtos:      
